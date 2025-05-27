@@ -1,6 +1,5 @@
-import { HomeOutlined, SettingOutlined } from "@ant-design/icons";
 import type { Route } from "./+types/home";
-import { Flex, Layout, Menu, theme, Typography, type MenuProps } from "antd";
+import { Card, Col, Layout, Row, Table, theme } from "antd";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -13,87 +12,47 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-const { Sider, Content, Header } = Layout;
-
-const items: MenuProps["items"] = [
-  {
-    key: "dashboard",
-    icon: <HomeOutlined />,
-    label: "Dashboard",
-  },
-  {
-    key: "config",
-    icon: <SettingOutlined />,
-    label: "Config",
-    children: [
-      {
-        key: "author",
-        label: "Author",
-      },
-      {
-        key: "category",
-        label: "Category",
-      },
-      {
-        key: "book",
-        label: "Book",
-      },
-      {
-        key: "member",
-        label: "Member",
-      },
-    ],
-  },
-];
+const { Content } = Layout;
 
 export default function Home() {
   const {
-    token: {
-      colorBgContainer,
-      borderRadiusLG,
-      colorBorderSecondary,
-      padding,
-      paddingLG,
-    },
+    token: { colorBgContainer, paddingLG, borderRadiusLG },
   } = theme.useToken();
 
   return (
-    <Layout style={{ minHeight: "100vh" }}>
-      <Header
-        style={{
-          backgroundColor: colorBgContainer,
-          borderBottom: `1px solid ${colorBorderSecondary}`,
-          padding: `0 ${paddingLG}px`,
-        }}
-      >
-        <Flex align="center" style={{ height: "100%" }}>
-          <Typography.Title style={{ margin: 0 }} level={5}>
-            Library Management System
-          </Typography.Title>
-        </Flex>
-      </Header>
-      <Layout>
-        <Sider width={272} breakpoint="lg">
-          <Menu
-            mode="inline"
-            defaultSelectedKeys={["dashboard"]}
-            defaultOpenKeys={["config"]}
-            items={items}
-            style={{ height: "100%", borderRight: 0 }}
-          />
-        </Sider>
-        <Layout style={{ padding: padding }}>
-          <Content
-            style={{
-              backgroundColor: colorBgContainer,
-              padding: paddingLG,
-              borderRadius: borderRadiusLG,
-            }}
-          >
-            Content
-          </Content>
-        </Layout>
-      </Layout>
-    </Layout>
+    <Content
+      style={{
+        backgroundColor: colorBgContainer,
+        padding: paddingLG,
+        borderRadius: borderRadiusLG,
+      }}
+    >
+      <Row gutter={16}>
+        <Col span={16}>
+          <Row gutter={16}>
+            <Col span={6}>
+              <Card></Card>
+            </Col>
+            <Col span={6}>
+              <Card></Card>
+            </Col>
+            <Col span={6}>
+              <Card></Card>
+            </Col>
+            <Col span={6}>
+              <Card></Card>
+            </Col>
+          </Row>
+
+          <Row>
+            <Col span={24}>
+              <Table />
+            </Col>
+          </Row>
+        </Col>
+
+        <Col span={8}></Col>
+      </Row>
+    </Content>
   );
 }
