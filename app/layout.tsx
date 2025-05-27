@@ -1,7 +1,8 @@
 import { HomeOutlined, SettingOutlined } from "@ant-design/icons";
 import { Flex, Layout, Menu, theme, Typography, type MenuProps } from "antd";
-import type { Route } from "./routes/+types/home";
-import { Outlet } from "react-router";
+import { Outlet, useLocation, useNavigate } from "react-router";
+import type { Route } from "./+types/layout";
+import { useMemo } from "react";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -16,9 +17,11 @@ export function meta({}: Route.MetaArgs) {
 
 const { Sider, Header } = Layout;
 
-const items: MenuProps["items"] = [
+type MenuItem = Required<MenuProps>["items"][number];
+
+const items: MenuItem[] = [
   {
-    key: "dashboard",
+    key: "/",
     icon: <HomeOutlined />,
     label: "Dashboard",
   },
@@ -28,19 +31,19 @@ const items: MenuProps["items"] = [
     label: "Config",
     children: [
       {
-        key: "author",
+        key: "/authors",
         label: "Author",
       },
       {
-        key: "category",
+        key: "/categories",
         label: "Category",
       },
       {
-        key: "book",
+        key: "/books",
         label: "Book",
       },
       {
-        key: "member",
+        key: "/members",
         label: "Member",
       },
     ],
@@ -51,6 +54,17 @@ export default function AppLayout() {
   const {
     token: { colorBgContainer, colorBorderSecondary, padding, paddingLG },
   } = theme.useToken();
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const selectedKeys = useMemo(() => {
+    return [location.pathname];
+  }, [location.pathname]);
+
+  const handleMenuClick: MenuProps["onClick"] = (e) => {
+    navigate(e.key);
+  };
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -75,13 +89,14 @@ export default function AppLayout() {
         >
           <Menu
             mode="inline"
-            defaultSelectedKeys={["dashboard"]}
+            selectedKeys={selectedKeys}
             defaultOpenKeys={["config"]}
             items={items}
             style={{
               height: "100%",
               borderRight: 0,
             }}
+            onClick={handleMenuClick}
           />
         </Sider>
         <Layout style={{ padding: padding }}>
