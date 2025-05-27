@@ -1,5 +1,6 @@
+import axiosInstance from "~/lib/axiosInstance";
 import type { Route } from "./+types/home";
-import { Card, Col, Layout, Row, Table, theme } from "antd";
+import { Card, Col, Layout, Row, Skeleton, Table, theme } from "antd";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -12,12 +13,48 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
+export async function clientLoader({}: Route.ClientLoaderArgs) {
+  const [overview, borrowedBooks, topBorrowers, topBooks] = await Promise.all([
+    axiosInstance.get("/dashboard/overview"),
+    axiosInstance.get("/borrowed-books?status=BORROWED"),
+    axiosInstance.get("/dashboard/members/top-borrowers"),
+    axiosInstance.get("/dashboard/members/top-borrowers"),
+  ]);
+
+  return {
+    overview: overview.data,
+    borrowedBooks: borrowedBooks.data,
+    topBorrowers: topBorrowers.data,
+    topBooks: topBooks.data,
+  };
+}
+
 const { Content } = Layout;
 
-export default function Home() {
+export function HydrateFallback() {
   const {
     token: { colorBgContainer, paddingLG, borderRadiusLG },
   } = theme.useToken();
+
+  return (
+    <Content
+      style={{
+        backgroundColor: colorBgContainer,
+        padding: paddingLG,
+        borderRadius: borderRadiusLG,
+      }}
+    >
+      <Skeleton.Node active />
+    </Content>
+  );
+}
+
+export default function Home({ loaderData }: Route.ComponentProps) {
+  const {
+    token: { colorBgContainer, paddingLG, borderRadiusLG },
+  } = theme.useToken();
+
+  console.log(loaderData);
 
   return (
     <Content
@@ -43,15 +80,11 @@ export default function Home() {
               <Card></Card>
             </Col>
           </Row>
-
-          <Row>
-            <Col span={24}>
-              <Table />
-            </Col>
-          </Row>
         </Col>
 
-        <Col span={8}></Col>
+        <Col span={8}>
+          <Table />
+        </Col>
       </Row>
     </Content>
   );

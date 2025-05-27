@@ -68,13 +68,20 @@ export default function AppLayout() {
         </Flex>
       </Header>
       <Layout>
-        <Sider width={272} breakpoint="lg">
+        <Sider
+          width={272}
+          breakpoint="lg"
+          style={{ backgroundColor: colorBgContainer }}
+        >
           <Menu
             mode="inline"
             defaultSelectedKeys={["dashboard"]}
             defaultOpenKeys={["config"]}
             items={items}
-            style={{ height: "100%", borderRight: 0 }}
+            style={{
+              height: "100%",
+              borderRight: 0,
+            }}
           />
         </Sider>
         <Layout style={{ padding: padding }}>
