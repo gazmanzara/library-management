@@ -21,61 +21,13 @@ import {
 import { PlusOutlined } from "@ant-design/icons";
 import React, { useMemo, useState, useCallback } from "react";
 import dayjs from "dayjs";
-
-interface Author {
-  id: number;
-  name: string;
-  biography: string;
-}
-
-interface Book {
-  id: number;
-  title: string;
-  author: Author;
-}
-
-interface Member {
-  id: number;
-  firstName: string;
-  lastName: string;
-}
-
-interface BorrowedBook {
-  id: number;
-  book: Book;
-  member: Member;
-  dueDate: string;
-}
-
-interface PopularBook {
-  id: number;
-  title: string;
-  author: string;
-  borrowCount: number;
-}
-
-interface TopBorrower {
-  id: number;
-  name: string;
-  borrowCount: number;
-  currentBorrows: number;
-}
-
-interface AvailableBook {
-  id: number;
-  title: string;
-  author: {
-    id: number;
-    name: string;
-  };
-}
-
-interface AvailableMember {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-}
+import type {
+  AvailableBook,
+  AvailableMember,
+  BorrowedBook,
+  PopularBook,
+  TopBorrower,
+} from "~/types.ts";
 
 export function meta({}: Route.MetaArgs) {
   return [

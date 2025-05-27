@@ -13,7 +13,7 @@ import {
   notification,
 } from "antd";
 import axiosInstance from "~/lib/axiosInstance";
-import type { Route } from "./+types/authors";
+import type { Route } from "./+types/categories";
 import React, { useMemo, useState, type FC } from "react";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
@@ -46,7 +46,7 @@ const { Content } = Layout;
 
 const Context = React.createContext({ name: "Default" });
 
-const Authors: FC<Route.ComponentProps> = ({
+const Categories: FC<Route.ComponentProps> = ({
   loaderData: initialLoaderData,
 }) => {
   const [loaderData, setLoaderData] = useState(initialLoaderData);
@@ -279,4 +279,4 @@ const Authors: FC<Route.ComponentProps> = ({
   );
 };
 
-export default Authors;
+export default Categories;
