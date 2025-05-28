@@ -24,6 +24,8 @@ export interface Member {
   id: number;
   firstName: string;
   lastName: string;
+  email: string;
+  phone: string;
 }
 
 export interface BorrowedBook {

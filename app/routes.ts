@@ -11,5 +11,6 @@ export default [
     route("/authors", "routes/authors/authors.tsx"),
     route("/categories", "routes/categories/categories.tsx"),
     route("/books", "routes/books/books.tsx"),
+    route("/member", "routes/member/member.tsx"),
   ]),
 ] satisfies RouteConfig;

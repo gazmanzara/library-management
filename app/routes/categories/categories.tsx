@@ -80,7 +80,6 @@ const Categories: FC<Route.ComponentProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [id, setId] = useState<number | null>(null);
 
   const {
     token: { colorBgContainer, paddingLG, borderRadiusLG },
@@ -126,37 +125,19 @@ const Categories: FC<Route.ComponentProps> = ({
     try {
       setIsSubmitting(true);
 
-      if (id) {
-        const response = await axiosInstance.put(`/categories/${id}`, values);
-        setLoaderData((prev) => ({
-          ...prev,
-          categories: prev.categories.map((category: Category) =>
-            category.id === id ? response.data : category
-          ),
-        }));
+      const response = await axiosInstance.post("/categories", values);
 
-        message.success("Category updated successfully");
-        api.success({
-          message: "Category updated successfully",
-          description: `Category ${values.name} has been updated.`,
-          placement: "bottomRight",
-        });
-        setId(null);
-      } else {
-        const response = await axiosInstance.post("/categories", values);
+      setLoaderData((prev) => ({
+        ...prev,
+        categories: [...prev.categories, response.data],
+      }));
 
-        setLoaderData((prev) => ({
-          ...prev,
-          categories: [...prev.categories, response.data],
-        }));
-
-        message.success("Category added successfully");
-        api.success({
-          message: "Category added successfully",
-          description: `Category ${values.name} has been added.`,
-          placement: "bottomRight",
-        });
-      }
+      message.success("Category added successfully");
+      api.success({
+        message: "Category added successfully",
+        description: `Category ${values.name} has been added.`,
+        placement: "bottomRight",
+      });
 
       setIsModalOpen(false);
       form.resetFields();
@@ -286,7 +267,7 @@ const Categories: FC<Route.ComponentProps> = ({
                   Cancel
                 </Button>
                 <Button type="primary" htmlType="submit" loading={isSubmitting}>
-                  {id ? "Update Category" : "Add Category"}
+                  Add Category
                 </Button>
               </Flex>
             </Form.Item>

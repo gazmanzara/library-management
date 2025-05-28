@@ -43,7 +43,7 @@ const items: MenuItem[] = [
         label: "Book",
       },
       {
-        key: "/members",
+        key: "/member",
         label: "Member",
       },
     ],
