@@ -10,5 +10,6 @@ export default [
     index("routes/home/home.tsx"),
     route("/authors", "routes/authors/authors.tsx"),
     route("/categories", "routes/categories/categories.tsx"),
+    route("/books", "routes/books/books.tsx"),
   ]),
 ] satisfies RouteConfig;

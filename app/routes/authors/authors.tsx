@@ -11,6 +11,8 @@ import {
   Input,
   message,
   notification,
+  Card,
+  Skeleton,
 } from "antd";
 import axiosInstance from "~/lib/axiosInstance";
 import type { Route } from "./+types/authors";
@@ -38,11 +40,36 @@ export async function clientLoader({}: Route.ClientLoaderArgs) {
   };
 }
 
-export function HydrateFallback() {
-  return <div>Loading...</div>;
-}
-
 const { Content } = Layout;
+
+export function HydrateFallback() {
+  const {
+    token: { colorBgContainer, paddingLG, borderRadiusLG },
+  } = theme.useToken();
+
+  return (
+    <Content
+      style={{
+        backgroundColor: colorBgContainer,
+        padding: paddingLG,
+        borderRadius: borderRadiusLG,
+      }}
+    >
+      <Card
+        title={
+          <Flex justify="space-between" align="center">
+            <Typography.Title level={4}>Authors</Typography.Title>
+            <Skeleton.Button active />
+          </Flex>
+        }
+      >
+        <Skeleton active />
+        <Skeleton active />
+        <Skeleton active />
+      </Card>
+    </Content>
+  );
+}
 
 const Context = React.createContext({ name: "Default" });
 
@@ -136,7 +163,7 @@ const Authors: FC<Route.ComponentProps> = ({
       form.resetFields();
     } catch (error) {
       api.error({
-        message: "Failed to add author",
+        message: id ? "Failed to update author" : "Failed to add author",
         description: error instanceof Error ? error.message : "Unknown error",
         placement: "bottomRight",
       });

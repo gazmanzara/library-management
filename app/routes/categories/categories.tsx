@@ -11,13 +11,15 @@ import {
   Input,
   message,
   notification,
+  Card,
+  Skeleton,
 } from "antd";
 import axiosInstance from "~/lib/axiosInstance";
 import type { Route } from "./+types/categories";
 import React, { useMemo, useState, type FC } from "react";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
-import type { Author } from "~/types";
+import type { Category } from "~/types";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -31,18 +33,43 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export async function clientLoader({}: Route.ClientLoaderArgs) {
-  const [authors] = await Promise.all([axiosInstance.get("/authors")]);
+  const [categories] = await Promise.all([axiosInstance.get("/categories")]);
 
   return {
-    authors: authors.data,
+    categories: categories.data,
   };
 }
 
-export function HydrateFallback() {
-  return <div>Loading...</div>;
-}
-
 const { Content } = Layout;
+
+export function HydrateFallback() {
+  const {
+    token: { colorBgContainer, paddingLG, borderRadiusLG },
+  } = theme.useToken();
+
+  return (
+    <Content
+      style={{
+        backgroundColor: colorBgContainer,
+        padding: paddingLG,
+        borderRadius: borderRadiusLG,
+      }}
+    >
+      <Card
+        title={
+          <Flex justify="space-between" align="center">
+            <Typography.Title level={4}>Categories</Typography.Title>
+            <Skeleton.Button active />
+          </Flex>
+        }
+      >
+        <Skeleton active />
+        <Skeleton active />
+        <Skeleton active />
+      </Card>
+    </Content>
+  );
+}
 
 const Context = React.createContext({ name: "Default" });
 
@@ -63,27 +90,27 @@ const Categories: FC<Route.ComponentProps> = ({
 
   const contextValue = useMemo(() => ({ name: "Ant Design" }), []);
 
-  const handleDeleteAuthor = async (authorId: number) => {
+  const handleDeleteCategory = async (categoryId: number) => {
     try {
       setIsSubmitting(true);
-      await axiosInstance.delete(`/authors/${authorId}`);
+      await axiosInstance.delete(`/categories/${categoryId}`);
 
       setLoaderData((prev) => ({
         ...prev,
-        authors: prev.authors.filter(
-          (author: Author) => author.id !== authorId
+        categories: prev.categories.filter(
+          (category: Category) => category.id !== categoryId
         ),
       }));
 
-      message.success("Author deleted successfully");
+      message.success("Category deleted successfully");
       api.success({
-        message: "Author deleted successfully",
-        description: `Author has been removed.`,
+        message: "Category deleted successfully",
+        description: `Category has been removed.`,
         placement: "bottomRight",
       });
     } catch (error) {
       api.error({
-        message: "Failed to delete author",
+        message: "Failed to delete category",
         description: error instanceof Error ? error.message : "Unknown error",
         placement: "bottomRight",
       });
@@ -92,42 +119,41 @@ const Categories: FC<Route.ComponentProps> = ({
     }
   };
 
-  const handleAddUpdateAuthor = async (values: {
+  const handleAddUpdateCategory = async (values: {
     name: string;
-    biography: string;
+    description: string;
   }) => {
     try {
       setIsSubmitting(true);
 
       if (id) {
-        // Update existing author
-        const response = await axiosInstance.put(`/authors/${id}`, values);
+        const response = await axiosInstance.put(`/categories/${id}`, values);
         setLoaderData((prev) => ({
           ...prev,
-          authors: prev.authors.map((author: Author) =>
-            author.id === id ? response.data : author
+          categories: prev.categories.map((category: Category) =>
+            category.id === id ? response.data : category
           ),
         }));
 
-        message.success("Author updated successfully");
+        message.success("Category updated successfully");
         api.success({
-          message: "Author updated successfully",
-          description: `Author ${values.name} has been updated.`,
+          message: "Category updated successfully",
+          description: `Category ${values.name} has been updated.`,
           placement: "bottomRight",
         });
         setId(null);
       } else {
-        const response = await axiosInstance.post("/authors", values);
+        const response = await axiosInstance.post("/categories", values);
 
         setLoaderData((prev) => ({
           ...prev,
-          authors: [...prev.authors, response.data],
+          categories: [...prev.categories, response.data],
         }));
 
-        message.success("Author added successfully");
+        message.success("Category added successfully");
         api.success({
-          message: "Author added successfully",
-          description: `Author ${values.name} has been added.`,
+          message: "Category added successfully",
+          description: `Category ${values.name} has been added.`,
           placement: "bottomRight",
         });
       }
@@ -136,7 +162,7 @@ const Categories: FC<Route.ComponentProps> = ({
       form.resetFields();
     } catch (error) {
       api.error({
-        message: "Failed to add author",
+        message: "Failed to add Category",
         description: error instanceof Error ? error.message : "Unknown error",
         placement: "bottomRight",
       });
@@ -156,7 +182,7 @@ const Categories: FC<Route.ComponentProps> = ({
         }}
       >
         <Table
-          dataSource={loaderData.authors}
+          dataSource={loaderData.categories}
           loading={isSubmitting}
           columns={
             [
@@ -167,9 +193,9 @@ const Categories: FC<Route.ComponentProps> = ({
                 sorter: (a, b) => a.name.localeCompare(b.name),
               },
               {
-                title: "Biography",
-                dataIndex: "biography",
-                key: "biography",
+                title: "Description",
+                dataIndex: "description",
+                key: "description",
                 ellipsis: true,
               },
               {
@@ -179,45 +205,33 @@ const Categories: FC<Route.ComponentProps> = ({
                 render: (_, record) => (
                   <Space>
                     <Button
-                      icon={<EditOutlined />}
-                      type="text"
-                      onClick={() => {
-                        setIsModalOpen(true);
-                        form.setFieldsValue({
-                          name: record.name,
-                          biography: record.biography,
-                        });
-                        setId(record.id);
-                      }}
-                    />
-                    <Button
                       icon={<DeleteOutlined />}
                       type="text"
                       danger
-                      onClick={() => handleDeleteAuthor(record.id)}
+                      onClick={() => handleDeleteCategory(record.id)}
                     />
                   </Space>
                 ),
               },
-            ] as ColumnsType<Author>
+            ] as ColumnsType<Category>
           }
           rowKey="id"
           title={() => (
             <Flex justify="space-between" align="center">
-              <Typography.Title level={4}>Authors</Typography.Title>
+              <Typography.Title level={4}>Categories</Typography.Title>
               <Button
                 icon={<PlusOutlined />}
                 type="primary"
                 onClick={() => setIsModalOpen(true)}
               >
-                Add Author
+                Add Category
               </Button>
             </Flex>
           )}
         />
 
         <Modal
-          title="Add New Author"
+          title="Add New Category"
           open={isModalOpen}
           onCancel={() => {
             setIsModalOpen(false);
@@ -225,12 +239,16 @@ const Categories: FC<Route.ComponentProps> = ({
           }}
           footer={null}
         >
-          <Form form={form} layout="vertical" onFinish={handleAddUpdateAuthor}>
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleAddUpdateCategory}
+          >
             <Form.Item
               name="name"
               label="Name"
               rules={[
-                { required: true, message: "Please enter the author's name" },
+                { required: true, message: "Please enter the category name" },
                 {
                   max: 100,
                   message: "Name cannot be longer than 100 characters",
@@ -241,16 +259,16 @@ const Categories: FC<Route.ComponentProps> = ({
             </Form.Item>
 
             <Form.Item
-              name="biography"
-              label="Biography"
+              name="description"
+              label="Description"
               rules={[
                 {
                   required: true,
-                  message: "Please enter the author's biography",
+                  message: "Please enter the category description",
                 },
                 {
                   max: 500,
-                  message: "Biography cannot be longer than 500 characters",
+                  message: "Description cannot be longer than 500 characters",
                 },
               ]}
             >
@@ -268,7 +286,7 @@ const Categories: FC<Route.ComponentProps> = ({
                   Cancel
                 </Button>
                 <Button type="primary" htmlType="submit" loading={isSubmitting}>
-                  {id ? "Update Author" : "Add Author"}
+                  {id ? "Update Category" : "Add Category"}
                 </Button>
               </Flex>
             </Form.Item>

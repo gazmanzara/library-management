@@ -4,10 +4,20 @@ export interface Author {
   biography: string;
 }
 
+export interface Category {
+  id: number;
+  name: string;
+  description: string;
+}
 export interface Book {
   id: number;
   title: string;
   author: Author;
+  publicationYear: number;
+  description: string;
+  categories: Category[];
+  imgUrl: string;
+  isbn: string;
 }
 
 export interface Member {
