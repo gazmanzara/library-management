@@ -33,6 +33,7 @@ export interface BorrowedBook {
   book: Book;
   member: Member;
   dueDate: string;
+  borrowDate: string;
 }
 
 export interface PopularBook {

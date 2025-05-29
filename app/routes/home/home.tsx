@@ -17,6 +17,7 @@ import {
   Select,
   DatePicker,
   notification,
+  Input,
 } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import React, { useMemo, useState, useCallback } from "react";
@@ -182,7 +183,33 @@ export default function Home({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [returningBookId, setReturningBookId] = useState<number | null>(null);
   const [isBorrowing, setIsBorrowing] = useState(false);
+  const [searchText, setSearchText] = useState("");
   const [form] = Form.useForm();
+
+  const filteredBooks = loaderData.borrowedBooks.filter(
+    (borrowedBook: BorrowedBook) => {
+      const search = searchText.toLowerCase();
+      const memberName =
+        `${borrowedBook.member.firstName} ${borrowedBook.member.lastName}`.toLowerCase();
+      const bookTitle = borrowedBook.book.title.toLowerCase();
+      const borrowDate = new Date(borrowedBook.borrowDate)
+        .toLocaleDateString()
+        .toLowerCase();
+
+      return (
+        memberName.includes(search) ||
+        bookTitle.includes(search) ||
+        borrowDate.includes(search)
+      );
+    }
+  );
+
+  const sortedBooks = filteredBooks.sort((a: BorrowedBook, b: BorrowedBook) => {
+    const aOverdue = new Date(a.dueDate) < new Date();
+    const bOverdue = new Date(b.dueDate) < new Date();
+    if (aOverdue !== bOverdue) return aOverdue ? -1 : 1;
+    return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+  });
 
   const {
     token: {
@@ -311,6 +338,21 @@ export default function Home({
     } finally {
       setReturningBookId(null);
     }
+  };
+
+  const highlightText = (text: string, search: string) => {
+    if (!search) return text;
+    const regex = new RegExp(`(${search})`, "gi");
+    const parts = text.split(regex);
+    return parts.map((part, index) =>
+      part.toLowerCase() === search.toLowerCase() ? (
+        <mark key={index} style={{ backgroundColor: "yellow" }}>
+          {part}
+        </mark>
+      ) : (
+        part
+      )
+    );
   };
 
   return (
@@ -526,7 +568,16 @@ export default function Home({
               loading={isRefreshing}
               title={() => (
                 <Flex justify="space-between" align="center">
-                  <Typography.Title level={4}>Borrowed Books</Typography.Title>
+                  <Typography.Title level={4} style={{ margin: 0 }}>
+                    Borrowed Books
+                  </Typography.Title>
+                  <Input.Search
+                    placeholder="Search borrowed books"
+                    style={{ width: 500 }}
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    allowClear
+                  />
                   <Button
                     icon={<PlusOutlined />}
                     type="primary"
@@ -538,34 +589,34 @@ export default function Home({
                 </Flex>
               )}
               bordered
-              dataSource={loaderData.borrowedBooks.sort(
-                (a: BorrowedBook, b: BorrowedBook) => {
-                  const aOverdue = new Date(a.dueDate) < new Date();
-                  const bOverdue = new Date(b.dueDate) < new Date();
-                  if (aOverdue !== bOverdue) return aOverdue ? -1 : 1;
-                  return (
-                    new Date(a.dueDate).getTime() -
-                    new Date(b.dueDate).getTime()
-                  );
-                }
-              )}
+              dataSource={sortedBooks}
               columns={[
                 {
                   title: "Member",
                   dataIndex: ["member", "firstName"],
                   key: "name",
-                  render: (_: unknown, record: BorrowedBook) =>
-                    `${record.member.firstName} ${record.member.lastName}`,
+                  render: (_: unknown, record: BorrowedBook) => {
+                    const fullName = `${record.member.firstName} ${record.member.lastName}`;
+                    return highlightText(fullName, searchText);
+                  },
                 },
                 {
                   title: "Book",
                   dataIndex: ["book", "title"],
                   key: "book",
-                  render: (_: unknown, record: BorrowedBook) => (
-                    <span>
-                      {record.book.title} ({record.book.author.name})
-                    </span>
-                  ),
+                  render: (_: unknown, record: BorrowedBook) => {
+                    const title = `${record.book.title} (${record.book.author.name})`;
+                    return highlightText(title, searchText);
+                  },
+                },
+                {
+                  title: "Borrow Date",
+                  dataIndex: "borrowDate",
+                  key: "borrowDate",
+                  render: (date: string) => {
+                    const formatted = new Date(date).toLocaleDateString();
+                    return highlightText(formatted, searchText);
+                  },
                 },
                 {
                   title: "Due Date",
